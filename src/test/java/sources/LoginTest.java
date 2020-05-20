@@ -38,8 +38,8 @@ public class LoginTest {
     }
 
     @Test
-    public void test() throws InterruptedException {
-
+    public void test() throws Exception {
+        constructPage.requestPage().fillIn();
         Thread.sleep(5000);
     }
 }
