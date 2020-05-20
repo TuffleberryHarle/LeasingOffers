@@ -43,6 +43,4 @@ public class LoginPage extends Props {
     public void submitClick(){
         submit.click();
     }
-
-
 }
