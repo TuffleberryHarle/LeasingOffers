@@ -13,11 +13,17 @@ public class LoginTest {
     private static FirefoxDriver webDriver;
 
     @BeforeClass
-    public static void setUp(){
+    public static void setUp() throws InterruptedException{
         System.setProperty(Props.getProperty("GECKO"), Props.getProperty("GECKO_PATH"));
         webDriver = new FirefoxDriver();
         constructPage = new ConstructPage(webDriver);
         webDriver.get(Props.getProperty("PREFILLED_PROD_PAGE"));
+        /**
+         * Logging in part
+         */
+        constructPage.loginPage().loginInput();
+        constructPage.loginPage().psswdInput();
+        constructPage.loginPage().submitClick();
     }
 
     @AfterClass
@@ -27,10 +33,8 @@ public class LoginTest {
     }
 
     @Test
-    public void loginTest() throws InterruptedException {
-        constructPage.loginPage().loginInput();
-        constructPage.loginPage().psswdInput();
-        constructPage.loginPage().submitClick();
+    public void test() throws InterruptedException {
         Thread.sleep(5000);
+
     }
 }

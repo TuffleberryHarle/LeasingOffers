@@ -4,13 +4,16 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
+import org.openqa.selenium.support.ui.WebDriverWait;
 
 public class ProductsPage {
-    public WebDriver driver;
+    public WebDriver webDriver;
+    private WebDriverWait wait;
 
-    public ProductsPage(WebDriver driver){
-        PageFactory.initElements(driver, this);
-        this.driver = driver;
+    public ProductsPage(WebDriver webDriver){
+        PageFactory.initElements(webDriver, this);
+        this.webDriver = webDriver;
+        wait = new WebDriverWait(webDriver, 30, 500);
     }
 
     /**
@@ -30,6 +33,7 @@ public class ProductsPage {
     private static WebElement createNewRequest;
 
     public void closeButtonClick(){
+
         closeButton.click();
     }
 
