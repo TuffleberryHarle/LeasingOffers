@@ -1,14 +1,12 @@
 package sources;
 
 import org.junit.AfterClass;
-import org.junit.Before;
 import org.junit.BeforeClass;
 import org.junit.Test;
-import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import resources.Props;
 
-public class LoginTest {
+public class OfferTest {
     private static ConstructPage constructPage;
     private static FirefoxDriver webDriver;
 
@@ -18,6 +16,7 @@ public class LoginTest {
         webDriver = new FirefoxDriver();
         constructPage = new ConstructPage(webDriver);
         webDriver.get(Props.getProperty("ZERO_STEP"));
+        webDriver.manage().window().maximize();
         /**
          * Logging in part
          */
@@ -39,7 +38,8 @@ public class LoginTest {
 
     @Test
     public void test() throws Exception {
-        constructPage.requestPage().fillIn();
+        constructPage.requestPage().fillAndSend();
+        constructPage.requestPage().offerCheck();
         Thread.sleep(5000);
     }
 }
