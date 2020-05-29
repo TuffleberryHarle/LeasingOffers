@@ -50,7 +50,7 @@ public class RequestPage {
         @FindBy(css = "input[data-test-id='sliderAdvance--input']")
         protected WebElement advField;
 
-    public void fillAndSend() throws Exception {
+    public void fillAndSend(int ITEM, int MFR, int MOD, int MODIF) throws Exception {
         /**
          * Form block of accordion
          */
@@ -58,21 +58,20 @@ public class RequestPage {
 
         // Pick a vehicle
         leasItemMenu.click();
-        webDriver.findElement(By.xpath(Props.getProperty("PASSENGER"))).click();
+        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectItem--selectList']/div["+ITEM+"]")).click();
 
         wait.until(ExpectedConditions.visibilityOf(leasMfrMenu));
         leasMfrMenu.click();
-        webDriver.findElement(By.xpath(Props.getProperty("AUDI"))).click();
+        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectMfr--selectList']/div["+MFR+"]")).click();
 
         wait.until(ExpectedConditions.visibilityOf(leasModMenu));
         leasModMenu.click();
-        webDriver.findElement(By.xpath(Props.getProperty("A1"))).click();
-        if (webDriver.findElement(By.xpath(Props.getProperty("MODIF_PATH")))
-                .getText().isEmpty()) {
-            Thread.sleep(2000);
-        }
+        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectModel--selectList']/div["+MOD+"]")).click();
+
+        wait.until(ExpectedConditions.presenceOfNestedElementsLocatedBy(By
+                .xpath(Props.getProperty("MODIF_PATH")), By.xpath(Props.getProperty("1stMOD"))));
         leasModifMenu.click();
-        webDriver.findElement(By.xpath(Props.getProperty("1stMOD"))).click();
+        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectModification--selectList']/div["+MODIF+"]")).click();
 
         // Go to the next block
         wait.until(ExpectedConditions.visibilityOf(nextButton));

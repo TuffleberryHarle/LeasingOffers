@@ -15,8 +15,8 @@ public class OfferTest {
         System.setProperty(Props.getProperty("GECKO"), Props.getProperty("GECKO_PATH"));
         webDriver = new FirefoxDriver();
         constructPage = new ConstructPage(webDriver);
-        webDriver.get(Props.getProperty("ZERO_STEP"));
         webDriver.manage().window().maximize();
+        webDriver.get(Props.getProperty("ZERO_STEP1"));
         /**
          * Logging in part
          */
@@ -38,7 +38,8 @@ public class OfferTest {
 
     @Test
     public void test() throws Exception {
-        constructPage.requestPage().fillAndSend();
+        int ITEM = 4, MFR = 1, MOD = 1, MODIF = 1;
+        constructPage.requestPage().fillAndSend(ITEM, MFR, MOD, MODIF);
         constructPage.requestPage().offerCheck();
         Thread.sleep(5000);
     }
