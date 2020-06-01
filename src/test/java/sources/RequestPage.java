@@ -22,7 +22,6 @@ public class RequestPage {
         wait = new WebDriverWait(webDriver, 30, 500);
     }
 
-
         @FindBy(css = "div[data-test-id='leasingSelectItem--selectDropDown']")
         protected WebElement leasItemMenu;
 
@@ -54,58 +53,69 @@ public class RequestPage {
         /**
          * Form block of accordion
          */
-        wait.until(ExpectedConditions.visibilityOf(leasItemMenu));
-
         // Pick a vehicle
-        leasItemMenu.click();
-        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectItem--selectList']/div["+ITEM+"]")).click();
-
-        wait.until(ExpectedConditions.visibilityOf(leasMfrMenu));
-        leasMfrMenu.click();
-        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectMfr--selectList']/div["+MFR+"]")).click();
-
-        wait.until(ExpectedConditions.visibilityOf(leasModMenu));
-        leasModMenu.click();
-        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectModel--selectList']/div["+MOD+"]")).click();
-
-        wait.until(ExpectedConditions.presenceOfNestedElementsLocatedBy(By
-                .xpath(Props.getProperty("MODIF_PATH")), By.xpath(Props.getProperty("1stMOD"))));
-        leasModifMenu.click();
-        webDriver.findElement(By.xpath("//div[@data-test-id='leasingSelectModification--selectList']/div["+MODIF+"]")).click();
-
+        dropDownPick(ITEM, "Item", leasItemMenu);
+        dropDownPick(MFR, "Mfr", leasMfrMenu);
+        dropDownPick(MOD, "Model", leasModMenu);
+        modifIsNotEmptyWait();
+        dropDownPick(MODIF, "Modification", leasModifMenu);
         // Go to the next block
-        wait.until(ExpectedConditions.visibilityOf(nextButton));
-        nextButton.click();
+        nextButtonClick();
         /**
          * Finances block of accordion
          */
-        wait.until(ExpectedConditions.presenceOfElementLocated(By
-                .cssSelector("button[data-analytics-label='accordion Отправить на рассмотрение']")));
-
+        sendButtonWait();
         // Pick a tax method
-        taxMenu.click();
-        webDriver.findElement(By.xpath(Props.getProperty("1stTAX"))).click();
-
+        taxPick();
         // Set sum, term and advance
-        sumField.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-        sumField.sendKeys(Props.getProperty("SUM"));
-        sumField.sendKeys(Keys.RETURN);
-//        Thread.sleep(3000);
-        termField.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-        termField.sendKeys(Props.getProperty("TERM"));
-        sumField.sendKeys(Keys.RETURN);
-//        Thread.sleep(3000);
-        advField.sendKeys(Keys.chord(Keys.CONTROL, "a"));
-        advField.sendKeys(Props.getProperty("ADV"));
-        sumField.sendKeys(Keys.RETURN);
-
+        financesOptions(sumField, "SUM");
+        financesOptions(termField, "TERM");
+        financesOptions(advField, "ADV");
         // Send request
-        webDriver.findElement(By.xpath(Props.getProperty("SEND_BUTTON"))).click();
+        sendButtonClick();
     }
 
     public void offerCheck() throws InterruptedException {
         wait.until(ExpectedConditions.presenceOfElementLocated(By
                 .cssSelector("button[data-test-id='leasing-download-pdf--button']")));
         Thread.sleep(3000);
+    }
+
+    public void dropDownPick(int CONST, String DROPDOWN, WebElement dropDownMenu){
+        wait.until(ExpectedConditions.visibilityOf(dropDownMenu));
+        dropDownMenu.click();
+        webDriver.findElement(By
+                .xpath("//div[@data-test-id='leasingSelect"+DROPDOWN+"--selectList']/div["+CONST+"]")).click();
+    }
+
+    public void financesOptions(WebElement field, String prop) {
+        field.sendKeys(Keys.chord(Keys.CONTROL, "a"));
+        field.sendKeys(Props.getProperty(prop));
+        field.sendKeys(Keys.TAB);
+        field.sendKeys(Keys.TAB);
+    }
+
+    public void taxPick(){
+        taxMenu.click();
+        webDriver.findElement(By.xpath(Props.getProperty("1stTAX"))).click();
+    }
+
+    public void modifIsNotEmptyWait(){
+        wait.until(ExpectedConditions.presenceOfNestedElementsLocatedBy(By
+                .xpath(Props.getProperty("MODIF_PATH")), By.xpath(Props.getProperty("1stMOD"))));
+    }
+
+    public void nextButtonClick(){
+        wait.until(ExpectedConditions.visibilityOf(nextButton));
+        nextButton.click();
+    }
+
+    public void sendButtonWait(){
+        wait.until(ExpectedConditions.presenceOfElementLocated(By
+                .cssSelector("button[data-analytics-label='accordion Отправить на рассмотрение']")));
+    }
+
+    public void sendButtonClick(){
+        webDriver.findElement(By.xpath(Props.getProperty("SEND_BUTTON"))).click();
     }
 }
