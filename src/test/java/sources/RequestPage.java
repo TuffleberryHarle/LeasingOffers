@@ -12,6 +12,8 @@ import org.openqa.selenium.support.ui.ExpectedConditions;
 import org.openqa.selenium.support.ui.WebDriverWait;
 import resources.Props;
 
+import java.util.ArrayList;
+
 public class RequestPage {
     public WebDriver webDriver;
     public WebDriverWait wait;
@@ -75,9 +77,16 @@ public class RequestPage {
         sendButtonClick();
     }
 
-    public void offerCheck() throws InterruptedException {
-        wait.until(ExpectedConditions.presenceOfElementLocated(By
-                .cssSelector("button[data-test-id='leasing-download-pdf--button']")));
+    public void offerCheck(int ITEM, int MFR, int MOD, int MODIF, ArrayList failures) throws InterruptedException {
+        try {
+            wait.until(ExpectedConditions.presenceOfElementLocated(By
+                    .cssSelector("button[data-test-id='leasing-download-pdf--button']")));
+        }
+        catch (Exception e){
+            System.out.println("Не пришло\t" + ITEM + MFR + MOD + MODIF);
+            failures.add(String.valueOf(ITEM)+String.valueOf(MFR)+String.valueOf(MOD)+String.valueOf(MODIF));
+            System.out.println(failures);
+        }
         Thread.sleep(3000);
     }
 
