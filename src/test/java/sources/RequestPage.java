@@ -1,11 +1,7 @@
 package sources;
 
 import org.junit.Assert;
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
-import org.openqa.selenium.interactions.KeyInput;
+import org.openqa.selenium.*;
 import org.openqa.selenium.support.FindBy;
 import org.openqa.selenium.support.PageFactory;
 import org.openqa.selenium.support.ui.ExpectedConditions;
@@ -13,6 +9,9 @@ import org.openqa.selenium.support.ui.WebDriverWait;
 import resources.Props;
 
 import java.util.ArrayList;
+import java.util.List;
+
+import static org.junit.Assert.assertTrue;
 
 public class RequestPage {
     public WebDriver webDriver;
@@ -21,35 +20,35 @@ public class RequestPage {
     public RequestPage(WebDriver webDriver){
         PageFactory.initElements(webDriver, this);
         this.webDriver = webDriver;
-        wait = new WebDriverWait(webDriver, 30, 500);
+        wait = new WebDriverWait(webDriver, 20, 500);
     }
 
-        @FindBy(css = "div[data-test-id='leasingSelectItem--selectDropDown']")
-        protected WebElement leasItemMenu;
+    @FindBy(css = "div[data-test-id='leasingSelectItem--selectDropDown']")
+    protected WebElement leasItemMenu;
 
-        @FindBy(css = "div[data-test-id='leasingSelectMfr--selectDropDown']")
-        protected WebElement leasMfrMenu;
+    @FindBy(css = "div[data-test-id='leasingSelectMfr--selectDropDown']")
+    protected WebElement leasMfrMenu;
 
-        @FindBy(css = "div[data-test-id='leasingSelectModel--selectDropDown']")
-        protected WebElement leasModMenu;
+    @FindBy(css = "div[data-test-id='leasingSelectModel--selectDropDown']")
+    protected WebElement leasModMenu;
 
-        @FindBy(css = "div[data-test-id='leasingSelectModification--selectDropDown']")
-        protected WebElement leasModifMenu;
+    @FindBy(css = "div[data-test-id='leasingSelectModification--selectDropDown']")
+    protected WebElement leasModifMenu;
 
-        @FindBy(css = "button[data-test-id='forward-link--button']")
-        protected WebElement nextButton;
+    @FindBy(css = "button[data-test-id='forward-link--button']")
+    protected WebElement nextButton;
 
-        @FindBy(css = "div[data-test-id='taxMode--selectDropDown']")
-        protected WebElement taxMenu;
+    @FindBy(css = "div[data-test-id='taxMode--selectDropDown']")
+    protected WebElement taxMenu;
 
-        @FindBy(css = "input[data-test-id='sliderAmount--input']")
-        protected WebElement sumField;
+    @FindBy(css = "input[data-test-id='sliderAmount--input']")
+    protected WebElement sumField;
 
-        @FindBy(css = "input[data-test-id='sliderTerm--input']")
-        protected WebElement termField;
+    @FindBy(css = "input[data-test-id='sliderTerm--input']")
+    protected WebElement termField;
 
-        @FindBy(css = "input[data-test-id='sliderAdvance--input']")
-        protected WebElement advField;
+    @FindBy(css = "input[data-test-id='sliderAdvance--input']")
+    protected WebElement advField;
 
     public void fillAndSend(int ITEM, int MFR, int MOD, int MODIF) throws Exception {
         /**
@@ -59,7 +58,7 @@ public class RequestPage {
         dropDownPick(ITEM, "Item", leasItemMenu);
         dropDownPick(MFR, "Mfr", leasMfrMenu);
         dropDownPick(MOD, "Model", leasModMenu);
-        modifIsNotEmptyWait();
+        modifIsNotEmptyWait(MODIF);
         dropDownPick(MODIF, "Modification", leasModifMenu);
         // Go to the next block
         nextButtonClick();
@@ -70,23 +69,29 @@ public class RequestPage {
         // Pick a tax method
         taxPick();
         // Set sum, term and advance
-        financesOptions(sumField, "SUM");
-        financesOptions(termField, "TERM");
-        financesOptions(advField, "ADV");
+        financesConditions(sumField, "SUM");
+        financesConditions(termField, "TERM");
+        financesConditions(advField, "ADV");
         // Send request
         sendButtonClick();
     }
 
-    public void offerCheck(int ITEM, int MFR, int MOD, int MODIF, ArrayList failures) throws InterruptedException {
+    public void offerCheck(int ITEM, int MFR, int MOD, int MODIF, ArrayList failures) throws Exception {
         try {
             wait.until(ExpectedConditions.presenceOfElementLocated(By
                     .cssSelector("button[data-test-id='leasing-download-pdf--button']")));
         }
         catch (Exception e){
-            System.out.println("Не пришло\t" + ITEM + MFR + MOD + MODIF);
             failures.add(String.valueOf(ITEM)+String.valueOf(MFR)+String.valueOf(MOD)+String.valueOf(MODIF));
-            System.out.println(failures);
+            e.printStackTrace();
+            webDriver.get(Props.getProperty("ZERO_STEP1"));
+            PageFactory.initElements(webDriver, this);
+            createNewRequestClick();
+            fillAndSend(ITEM, MFR, MOD, MODIF+1);
+            offerCheck(ITEM, MFR, MOD, MODIF+1, failures);
+            return;
         }
+        changeConditions(ITEM, MFR, MOD, MODIF, failures);
         Thread.sleep(3000);
     }
 
@@ -97,7 +102,7 @@ public class RequestPage {
                 .xpath("//div[@data-test-id='leasingSelect"+DROPDOWN+"--selectList']/div["+CONST+"]")).click();
     }
 
-    public void financesOptions(WebElement field, String prop) {
+    public void financesConditions(WebElement field, String prop) {
         field.sendKeys(Keys.chord(Keys.CONTROL, "a"));
         field.sendKeys(Props.getProperty(prop));
         field.sendKeys(Keys.TAB);
@@ -109,9 +114,19 @@ public class RequestPage {
         webDriver.findElement(By.xpath(Props.getProperty("1stTAX"))).click();
     }
 
-    public void modifIsNotEmptyWait(){
+    public void modifIsNotEmptyWait(int MODIF){
+        //wait for modifications list to appear
         wait.until(ExpectedConditions.presenceOfNestedElementsLocatedBy(By
                 .xpath(Props.getProperty("MODIF_PATH")), By.xpath(Props.getProperty("1stMOD"))));
+        //check how much modifications we have
+        WebElement tableElement = webDriver.findElement(By.xpath(Props.getProperty("MODIF_PATH")));
+        List<WebElement> records = tableElement.findElements(By.tagName("div"));
+        try {
+            assert(records.size() >= MODIF);
+        } catch (Exception e) {
+            e.printStackTrace();
+            System.out.println("You've checked each of modifications for this model");
+        }
     }
 
     public void nextButtonClick(){
@@ -125,6 +140,22 @@ public class RequestPage {
     }
 
     public void sendButtonClick(){
-        webDriver.findElement(By.xpath(Props.getProperty("SEND_BUTTON"))).click();
+        webDriver.findElement(By
+                .xpath(Props.getProperty("SEND_BUTTON"))).click();
+    }
+
+    public void createNewRequestClick(){
+        wait.until(ExpectedConditions.presenceOfElementLocated(By
+                .cssSelector("button[data-analytics-label='Create new request']")));
+        webDriver.findElement((By
+                .cssSelector("button[data-analytics-label='Create new request']"))).click();
+    }
+
+    public void changeConditions(int ITEM, int MFR, int MOD, int MODIF, ArrayList failures) throws Exception {
+        webDriver.findElement(By
+                .xpath("button[data-test-id='leasing-decline-link--button']")).click();
+        // ADD JUMPING TO THE FIRST BLOCK OF ACCORDION
+        fillAndSend(ITEM, MFR, MOD, MODIF+1);
+        offerCheck(ITEM, MFR, MOD, MODIF+1, failures);
     }
 }
